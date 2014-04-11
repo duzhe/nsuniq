@@ -1,0 +1,71 @@
+#!/bin/env sh
+
+KEY=0;
+PRINT='k';
+
+tt()
+{
+	echo $#
+	echo $*
+	while [ $# -gt 0 ]
+	do
+		echo $1
+		shift
+	done
+}
+
+PC=0
+
+while [ $# -ge 1 ]
+do
+	case $1 in
+		'-c' )
+			PRINT='a[k],k';
+		;;
+
+
+		-k* )
+			P=${1#-k}
+			if [ -z "$P" ]
+			then
+				if [ $# -lt 2 ]
+				then
+					echo "-k need a param" >&2;
+					exit 1;
+				fi
+				shift
+				P=$1
+			fi
+			if ! [ $P -eq $P ] 2> /dev/null
+			then
+				echo "-k need a numeric param" >&2;
+				exit 2
+			fi
+			KEY=$P
+		;;
+
+		-F* )
+			P=${1#-F}
+			if [ -z "$P" ]
+			then
+				if [ $# -lt 2 ]
+				then
+					echo "-F need a param" >&2;
+					exit 1;
+				fi
+				shift
+				P=$1
+			fi
+			OPTIONS="$OPTIONS -F'$P'"
+		;;
+
+		* )
+			PARAM[$PC]="$1"
+			PC=$(($PC+1))
+		;;
+	esac
+	shift
+done
+AWKCODE="{a[\$${KEY}]++;}END{for(k in a) print ${PRINT};}"
+#tt exec awk $OPTIONS "$AWKCODE" $@
+exec awk $OPTIONS "$AWKCODE" "${PARAM[@]}"
