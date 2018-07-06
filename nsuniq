@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/bin/env bash
 
 KEY=0;
 PRINT='k';
@@ -6,15 +6,13 @@ PRINT='k';
 tt()
 {
 	echo $#
-	echo $*
+	echo "$@"
 	while [ $# -gt 0 ]
 	do
-		echo $1
+		echo "$1"
 		shift
 	done
 }
-
-PC=0
 
 while [ $# -ge 1 ]
 do
@@ -36,7 +34,7 @@ do
 				shift
 				P=$1
 			fi
-			if ! [ $P -eq $P ] 2> /dev/null
+			if ! [ "$P" -eq "$P" ] 2> /dev/null
 			then
 				echo "-k need a numeric param" >&2;
 				exit 2
@@ -56,16 +54,15 @@ do
 				shift
 				P=$1
 			fi
-			OPTIONS="$OPTIONS -F'$P'"
+			OPTIONS+=("-F$P")
 		;;
 
 		* )
-			PARAM[$PC]="$1"
-			PC=$(($PC+1))
+			PARAM+=("$1")
 		;;
 	esac
 	shift
 done
 AWKCODE="{a[\$${KEY}]++;}END{for(k in a) print ${PRINT};}"
-#tt exec awk $OPTIONS "$AWKCODE" $@
-exec awk $OPTIONS "$AWKCODE" "${PARAM[@]}"
+#tt exec awk "${OPTIONS[@]}" "$AWKCODE" "${PARAM[@]}"
+exec awk "${OPTIONS[@]}" "$AWKCODE" "${PARAM[@]}"
